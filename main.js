@@ -7,6 +7,7 @@ let downScallingFactor = 3; // Fine tuned to the point where it looks right
 // Function to handle file upload
 function handleFile(e) {
     const file = e.target.files[0];
+    console.log(file);
     if (!file) return;
 
     const reader = new FileReader();
@@ -23,10 +24,23 @@ function handleFile(e) {
         // Show the slider container
         document.getElementById('slider-container').style.display = 'block';
         
+        // Reset chart and related data
+        resetChart();
+        
         // Process the jsonData to fit the chart data structure
         processChartData(jsonData);
     };
     reader.readAsArrayBuffer(file);
+}
+
+function resetChart() {
+    if (chart) {
+        chart.destroy();
+        chart = null;
+    }
+    originalData = [];
+    document.getElementById('myRange').value = 2;
+    document.getElementById('demo').innerHTML = 2;
 }
 
 function processChartData(jsonData) {
@@ -61,7 +75,6 @@ function processChartData(jsonData) {
     updateChart(seriesData);
     // Call updateBubbleSizes on page load to set the correct initial size
     updateBubbleSizes(parseFloat(slider.value));
-
 }
 
 function splitNames(dataArray) {
