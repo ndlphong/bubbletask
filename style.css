@@ -1,44 +1,80 @@
+/* Root is the parent of all elements */
+:root{
+    /* -- is a custom property, it can be used to store values */
+
+    /*
+    Alternative Pearson colour scheme
+    --color-primary: #007FA3;
+    --color-secondary: #A32039;
+    */
+    
+    --color-primary: #44d4fd;
+    --color-secondary: #ff4560;
+    --color-pearson: #007FA3;
+    --color-label: #a7a7a7;
+    --color-text: #e2dede;
+    --font-family: "Poppins", sans-serif;
+}
+
+/* General Body Styling */
 body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Changed to flex-start for top alignment */
     height: 100vh;
     margin: 0;
-    background-color: #f9f9f9;
-    color: #333;
+    font-family: var(--font-family);
+    background-color: var(--color-pearson); /* Dark background color */
+    color: var(--color-text); /* White text color */
     padding-top: 20px;
 }
 
-.container{
-    width: 80vw;
-    height: 80vh;
+/* Container Styling */
+.container {
+    width: 90vw;
+    height: 90vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Changed to flex-start for top alignment */
     align-items: center;
     margin-bottom: 50px;
+    background: #1c1c1e; /* Dark container background */
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px 20px 70px 20px;
 }
 
+/* Chart Styling */
 #chart {
     width: 100%;
-    background: #ffffff;
-    padding: 30px;
+    background: #2c2c2e; /* Darker chart background */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
+    padding: 7px;
 }
 
+/* Slider Container Styling */
 .slidecontainer {
     width: 80%;
     margin: 20px auto;
+    text-align: center; /* Center align text inside the container */
 }
 
+/* Slider Text Styling */
+.slider-text {
+    font-size: 16px;
+    color: #ffffff;
+    margin-top: 10px;
+}
+
+/* Slider Styling */
 .slider {
     -webkit-appearance: none;
     width: 100%;
     height: 18px;
-    border-radius: 9px;  
-    background: #b3b3b3;
+    border-radius: 9px;
+    background: #3a3a3c; /* Dark slider background */
     outline: none;
     opacity: 0.9;
     transition: opacity .2s;
@@ -53,8 +89,8 @@ body {
     appearance: none;
     width: 30px;
     height: 30px;
-    border-radius: 50%; 
-    background: #007BFF;
+    border-radius: 50%;
+    background: #007FA3;
     cursor: pointer;
 }
 
@@ -62,11 +98,11 @@ body {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: #007BFF;
+    background: #007FA3;
     cursor: pointer;
 }
 
-/* Add styles for the file upload button */
+/* File Upload Button Styling */
 input[type="file"] {
     display: none;
 }
@@ -75,7 +111,7 @@ input[type="file"] {
     display: inline-block;
     padding: 12px 24px;
     cursor: pointer;
-    background-color: #007BFF;
+    background-color: #007FA3;
     color: #ffffff;
     border: none;
     border-radius: 4px;
@@ -83,8 +119,14 @@ input[type="file"] {
     font-weight: bold;
     text-align: center;
     transition: background-color 0.3s ease;
+    margin-bottom: 20px; /* Added margin for spacing */
 }
 
 .custom-file-upload:hover {
     background-color: #0056b3;
+}
+
+/* Change the bubble color */
+circle {
+    fill: var(--color-pearson) !important; /* Change this to your desired bubble color */
 }

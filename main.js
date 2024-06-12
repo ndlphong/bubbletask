@@ -4,6 +4,31 @@ var chart;
 var originalData = [];
 let downScallingFactor = 3; // Fine tuned to the point where it looks right
 
+let primaryColor = getComputedStyle(document.documentElement)
+.getPropertyValue('--color-primary')
+.trim();
+
+let secondaryColor = getComputedStyle(document.documentElement)
+.getPropertyValue('--color-secondary')
+.trim();
+
+let colorLabel = getComputedStyle(document.documentElement)
+.getPropertyValue('--color-label')
+.trim();
+
+let colorText = getComputedStyle(document.documentElement)
+.getPropertyValue('--color-text')
+.trim();
+
+let labelColor = getComputedStyle(document.documentElement)
+.getPropertyValue('--color-label')
+.trim();
+
+let fontFamily = getComputedStyle(document.documentElement)
+.getPropertyValue('--font-family')
+.trim();
+
+
 // Function to handle file upload
 function handleFile(e) {
     const file = e.target.files[0];
@@ -39,8 +64,8 @@ function resetChart() {
         chart = null;
     }
     originalData = [];
-    document.getElementById('myRange').value = 2;
-    document.getElementById('demo').innerHTML = 2;
+    document.getElementById('myRange').value = 2.5;
+    document.getElementById('demo').innerHTML = 2.5;
 }
 
 function processChartData(jsonData) {
@@ -94,13 +119,14 @@ function updateChart(seriesData) {
                 height: '90%',
                 width: '100%',
                 animations: {
-                    enabled: false
+                    enabled: false,
                 }
             },
             dataLabels: {
                 enabled: true,
                 style: {
-                    colors: ['#000000']
+                    colors: [colorText],
+                    fontSize: '15px',
                 },
                 formatter: function(val, opts) {
                     return opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex].name;
@@ -120,12 +146,18 @@ function updateChart(seriesData) {
                         if (val === 2) return '1-2 years';
                         if (val === 3) return 'Less than 1 year';
                         return '';
+                    },
+
+                    style: {
+                        colors: colorText,
+                        fontSize: '15px',
                     }
                 },
                 title: {
                     text: 'Velocity',
                     style: {
-                        color: '#555555'
+                        color: colorText,
+                        fontSize: '15px',
                     }
                 }
             },
@@ -134,10 +166,20 @@ function updateChart(seriesData) {
                 title: {
                     text: 'Probability',
                     style: {
-                        color: '#555555'
+                        color: colorText,
+                        fontSize: '15px',
                     }
                 },
                 tickAmount: 5,
+                labels: {
+                    formatter: function(val) {
+                        return val + '%';
+                    },
+                    style: {
+                        colors: colorText,
+                        fontSize: '15px',
+                    }
+                }
             },
             plotOptions: {
                 bubble: {
@@ -148,6 +190,7 @@ function updateChart(seriesData) {
                 text: 'Risk Analysis Bubble Chart',
                 align: 'center',
                 style: {
+                    color: colorText,
                     fontSize: '24px',
                     fontWeight: 'bold'
                 }
@@ -158,8 +201,8 @@ function updateChart(seriesData) {
                     var data = w.config.series[seriesIndex].data[dataPointIndex];
                     return `
                         <div style="padding: 10px; background: rgba(255, 255, 255, 0.9); border: 1px solid #ccc; border-radius: 5px; display: flex; gap: 3px">
-                            <div style="font-size: 14px; font-weight: bold; color: #333;">Bubble Size:</div>
-                            <div style="font-size: 14px; color: #666;">${data.originalSize}</div>
+                            <div style="font-size: 16px; font-weight: bold; color: #333;">Bubble Size:</div>
+                            <div style="font-size: 16px; color: #666;">${data.originalSize}</div>
                         </div>
                     `;
                 }

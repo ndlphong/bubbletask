@@ -12,14 +12,13 @@
     <div class="container">
         <input type="file" id="upload" accept=".xlsx, .xls" />
         <label for="upload" class="custom-file-upload"><strong>Upload File</strong></label>
-
-
-        <!--from https://www.w3schools.com/howto/howto_js_rangeslider.asp-->
-        <div class="slidecontainer" id="slider-container" style="display: none;">
-            <input type="range" min="1" max="5" value="2" step="0.1" class="slider" id="myRange">
-            <p>Bubble size scalling value: <span id="demo"></span></p>
-          </div>
+        
+        <!-- Chart and Slider Container -->
         <div id="chart"></div>
+        <div class="slidecontainer" id="slider-container" style="display: none;">
+            <input type="range" min="1" max="5" value="2.5" step="0.1" class="slider" id="myRange">
+            <p class="slider-text"><strong>Bubble size scaling value: </strong><span id="demo"></span></p>
+        </div>
     </div>
     <script src="main.js"></script>
 </body>
