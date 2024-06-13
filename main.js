@@ -124,11 +124,25 @@ function updateChart(seriesData) {
                     show: false
                 }
             },
+            grid: {
+                show: true,
+                xaxis: {
+                    lines: {
+                        show: true
+                    }
+                },   
+                yaxis: {
+                    lines: {
+                        show: true
+                    }
+                }, 
+            },
             dataLabels: {
                 enabled: true,
                 style: {
-                    colors: [colorText],
+                    colors: ['white'],
                     fontSize: '15px',
+                    fontWeight: '400',
                 },
                 formatter: function(val, opts) {
                     return opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex].name;
@@ -142,6 +156,7 @@ function updateChart(seriesData) {
                 min: 0.5,
                 max: 3.5,
                 tickAmount: 6,
+                // stepSize: 0.5,
                 labels: {
                     formatter: function(val) {
                         if (val === 1) return 'More than 2 years';
@@ -159,9 +174,17 @@ function updateChart(seriesData) {
                     text: 'Velocity',
                     style: {
                         color: colorText,
-                        fontSize: '15px',
+                        fontSize: '20px',
+                        fontWeight: '400',
                     }
-                }
+                },
+                axisTicks: {
+                    show: true,
+                    color: colorText
+                },
+                crosshairs: {
+                    show: false
+                },
             },
             yaxis: {
                 max: 50,
@@ -169,7 +192,8 @@ function updateChart(seriesData) {
                     text: 'Probability',
                     style: {
                         color: colorText,
-                        fontSize: '15px',
+                        fontSize: '20px',
+                        fontWeight: '400',
                     }
                 },
                 tickAmount: 5,
@@ -181,22 +205,26 @@ function updateChart(seriesData) {
                         colors: colorText,
                         fontSize: '15px',
                     }
-                }
+                },
+                axisTicks: {
+                    show: true,
+                    color: colorText
+                },
             },
             plotOptions: {
                 bubble: {
                     zScaling: false,
                 }
             },
-            title: {
-                text: 'Risk Analysis Bubble Chart',
-                align: 'center',
-                style: {
-                    color: colorText,
-                    fontSize: '24px',
-                    fontWeight: 'bold'
-                }
-            },
+            // title: {
+            //     text: 'Risk Analysis Bubble Chart',
+            //     align: 'center',
+            //     style: {
+            //         color: colorText,
+            //         fontSize: '24px',
+            //         fontWeight: 'bold'
+            //     }
+            // },
             tooltip: {
                 enabled: true,
                 custom: function({ series, seriesIndex, dataPointIndex, w }) {

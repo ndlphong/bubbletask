@@ -1,9 +1,9 @@
 /* Set the root variables */
 :root{
-    --color-primary: #44d4fd;
-    --color-pearson: #007FA3;
-    --color-label: #a7a7a7;
-    --color-text: #e2dede;
+    --color-primary: #007FA3;
+    --color-pearson: #ffffff;
+    --color-label: #555555;
+    --color-text: #333333;
     --font-family: "Poppins", sans-serif;
 }
 
@@ -30,7 +30,7 @@ body {
     justify-content: flex-start; /* Changed to flex-start for top alignment */
     align-items: center;
     margin-bottom: 50px;
-    background: #1c1c1e; /* Dark container background */
+    background: #ffffff; /* Light container background */
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px 20px 100px 20px; 
@@ -39,7 +39,7 @@ body {
 /* Chart Styling */
 #chart {
     width: 100%;
-    background: #2c2c2e; /* Darker chart background */
+    background: #ffffff; /* Lighter chart background */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
     padding: 7px;
@@ -55,7 +55,7 @@ body {
 /* Slider Text Styling */
 .slider-text {
     font-size: 16px;
-    color: #ffffff;
+    color: #333333;
     margin-top: 10px;
     padding-bottom: 10px;
 }
@@ -66,7 +66,7 @@ body {
     width: 100%;
     height: 18px;
     border-radius: 9px;
-    background: #3a3a3c; /* Dark slider background */
+    background: #cccccc; /* Light slider background */
     outline: none;
     opacity: 0.9;
     transition: opacity .2s;
@@ -120,8 +120,8 @@ input[type="file"] {
 
 /* Change the bubble color */
 circle {
-    fill: var(--color-pearson);
-    opacity: 0.8;
+    fill: #7496d4;
+    opacity: 0.75;
 }
 
 /* Download Button Styling */
