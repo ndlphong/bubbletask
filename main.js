@@ -94,7 +94,7 @@ function processChartData(jsonData) {
     }));
 
     updateChart(seriesData);
-    
+
     // Call updateBubbleSizes on page load to set the correct initial size
     updateBubbleSizes(parseFloat(slider.value));
 }
@@ -208,7 +208,7 @@ function updateChart(seriesData) {
                         </div>
                     `;
                 }
-            }
+            },
         };
 
         chart = new ApexCharts(document.querySelector("#chart"), options);
