@@ -8,10 +8,6 @@ let primaryColor = getComputedStyle(document.documentElement)
 .getPropertyValue('--color-primary')
 .trim();
 
-let secondaryColor = getComputedStyle(document.documentElement)
-.getPropertyValue('--color-secondary')
-.trim();
-
 let colorLabel = getComputedStyle(document.documentElement)
 .getPropertyValue('--color-label')
 .trim();

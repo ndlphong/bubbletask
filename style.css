@@ -1,15 +1,6 @@
-/* Root is the parent of all elements */
+/* Set the root variables */
 :root{
-    /* -- is a custom property, it can be used to store values */
-
-    /*
-    Alternative Pearson colour scheme
-    --color-primary: #007FA3;
-    --color-secondary: #A32039;
-    */
-    
     --color-primary: #44d4fd;
-    --color-secondary: #ff4560;
     --color-pearson: #007FA3;
     --color-label: #a7a7a7;
     --color-text: #e2dede;
@@ -21,19 +12,19 @@ body {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Changed to flex-start for top alignment */
+    align-items: flex-start; 
     height: 100vh;
     margin: 0;
     font-family: var(--font-family);
-    background-color: var(--color-pearson); /* Dark background color */
-    color: var(--color-text); /* White text color */
+    background-color: var(--color-pearson); 
+    color: var(--color-text); 
     padding-top: 20px;
 }
 
 /* Container Styling */
 .container {
     width: 90vw;
-    height: 90vh;
+    height: 80vh;
     display: flex;
     flex-direction: column;
     justify-content: flex-start; /* Changed to flex-start for top alignment */
@@ -42,7 +33,7 @@ body {
     background: #1c1c1e; /* Dark container background */
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px 20px 70px 20px;
+    padding: 20px 20px 100px 20px; 
 }
 
 /* Chart Styling */
@@ -58,7 +49,7 @@ body {
 .slidecontainer {
     width: 80%;
     margin: 20px auto;
-    text-align: center; /* Center align text inside the container */
+    text-align: center; 
 }
 
 /* Slider Text Styling */
@@ -128,5 +119,5 @@ input[type="file"] {
 
 /* Change the bubble color */
 circle {
-    fill: var(--color-pearson) !important; /* Change this to your desired bubble color */
+    fill: var(--color-pearson)
 }
