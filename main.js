@@ -94,13 +94,15 @@ function processChartData(jsonData) {
     }));
 
     updateChart(seriesData);
+    
     // Call updateBubbleSizes on page load to set the correct initial size
     updateBubbleSizes(parseFloat(slider.value));
 }
 
+// Split the name into an array of words
 function splitNames(dataArray) {
     dataArray.forEach(item => {
-        item.name = item.name.split(' ');  // Split the name into an array of words
+        item.name = item.name.split(' '); 
     });
     return dataArray;
 }
@@ -119,7 +121,7 @@ function updateChart(seriesData) {
                     enabled: false,
                 },
                 toolbar: {
-                    show: false // Disable the toolbar
+                    show: false
                 }
             },
             dataLabels: {
