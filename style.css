@@ -121,3 +121,23 @@ input[type="file"] {
 circle {
     fill: var(--color-pearson)
 }
+
+/* Download Button Styling */
+.download-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    cursor: pointer;
+    background-color: #007FA3;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px; /* Added margin for spacing */
+}
+
+.download-btn:hover {
+    background-color: #0056b3;
+}

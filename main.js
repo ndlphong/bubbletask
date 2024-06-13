@@ -114,8 +114,12 @@ function updateChart(seriesData) {
                 type: 'bubble',
                 height: '90%',
                 width: '100%',
+                id: 'myChart',  // Assigning an ID to the chart
                 animations: {
                     enabled: false,
+                },
+                toolbar: {
+                    show: false // Disable the toolbar
                 }
             },
             dataLabels: {
@@ -235,3 +239,15 @@ slider.oninput = function() {
     output.innerHTML = this.value;
     updateBubbleSizes(parseFloat(this.value)); // Convert slider value to float and update chart
 };
+
+document.getElementById('download-chart').addEventListener('click', function () {
+    html2canvas(document.querySelector("#chart"), {backgroundColor: null}).then(canvas => {
+        const imgURI = canvas.toDataURL("image/png");
+        const a = document.createElement('a');
+        a.href = imgURI;
+        a.download = 'chart.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+});
