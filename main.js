@@ -28,7 +28,6 @@ let fontFamily = getComputedStyle(document.documentElement)
 // Function to handle file upload
 function handleFile(e) {
     const file = e.target.files[0];
-    console.log(file);
     if (!file) return;
 
     const reader = new FileReader();
@@ -69,35 +68,61 @@ function processChartData(jsonData) {
     const headers = jsonData[0];
     const data = jsonData.slice(1);
 
-    originalData = data.map(row => {
-        return {
+    // Find the smallest size in the dataset directly from the data array
+    const sizeIndex = headers.indexOf('Size');
+    const minSize = Math.min(...data.map(row => parseFloat(row[sizeIndex])));
+    console.log('Minimum size:', minSize);
+
+    // Extract index of the Risk column
+    const riskIndex = headers.indexOf('Risks');
+
+    // Group data by risks
+    const groupedData = {};
+    data.forEach(row => {
+        const risk = row[riskIndex];
+        if (!groupedData[risk]) {
+            groupedData[risk] = [];
+        }
+        groupedData[risk].push({
             name: row[headers.indexOf('Name')],
-            velocity: parseFloat(row[headers.indexOf('Velocity')]),
-            probability: parseFloat(row[headers.indexOf('Probability')]),
-            size: parseFloat(row[headers.indexOf('Size')])
+            x: parseFloat(row[headers.indexOf('Velocity')]),
+            y: parseFloat(row[headers.indexOf('Probability')]),
+            z: parseFloat(row[headers.indexOf('Size')])
+        });
+    });
+    
+    // Process each group to split names and calculate sizes
+    const seriesData = Object.keys(groupedData).map(risk => {
+        const dataArray = groupedData[risk];
+
+        // Split names into an array of words
+        dataArray.forEach(item => {
+            item.name = item.name.split(' ');
+        });
+
+        // Convert data for ApexCharts with adjusted sizes
+        const processedData = dataArray.map(d => ({
+            x: d.x,
+            y: d.y,
+            z: minSize + ((d.z - minSize) / downScallingFactor),
+            name: d.name,
+        }));
+
+        return {
+            name: risk,
+            data: processedData
         };
     });
 
-    // Split names into an array of words
-    splitNames(originalData);
-
-    // Find the smallest size in the dataset
-    var minSize = Math.min(...originalData.map(d => d.size));
-
-    // Convert data for ApexCharts
-    var seriesData = originalData.map(d => ({
-        x: d.velocity,
-        y: d.probability,
-        z: minSize + ((d.size - minSize) / downScallingFactor),
-        name: d.name,
-        originalSize: d.size
-    }));
-
+    // Save original data for later use in updateBubbleSizes
+    originalData = seriesData;
+    // Update the chart with the new series data
     updateChart(seriesData);
 
     // Call updateBubbleSizes on page load to set the correct initial size
     updateBubbleSizes(parseFloat(slider.value));
 }
+
 
 // Split the name into an array of words
 function splitNames(dataArray) {
@@ -109,14 +134,14 @@ function splitNames(dataArray) {
 
 function updateChart(seriesData) {
     if (chart) {
-        chart.updateSeries([{name: 'Size', data: seriesData}]);
+        chart.updateSeries(seriesData);
     } else {
         var options = {
             chart: {
                 type: 'bubble',
                 height: '90%',
                 width: '100%',
-                id: 'myChart',  // Assigning an ID to the chart
+                id: 'myChart',
                 animations: {
                     enabled: false,
                 },
@@ -145,18 +170,15 @@ function updateChart(seriesData) {
                     fontWeight: '400',
                 },
                 formatter: function(val, opts) {
-                    return opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex].name;
+                    const dataPoint = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex];
+                    return dataPoint && dataPoint.name ? dataPoint.name : '';
                 }
             },
-            series: [{
-                name: 'Size',
-                data: seriesData
-            }],
+            series: seriesData,
             xaxis: {
                 min: 0.5,
                 max: 3.5,
                 tickAmount: 6,
-                // stepSize: 0.5,
                 labels: {
                     formatter: function(val) {
                         if (val === 1) return 'More than 2 years';
@@ -164,7 +186,6 @@ function updateChart(seriesData) {
                         if (val === 3) return 'Less than 1 year';
                         return '';
                     },
-
                     style: {
                         colors: colorText,
                         fontSize: '15px',
@@ -216,26 +237,11 @@ function updateChart(seriesData) {
                     zScaling: false,
                 }
             },
-            // title: {
-            //     text: 'Risk Analysis Bubble Chart',
-            //     align: 'center',
-            //     style: {
-            //         color: colorText,
-            //         fontSize: '24px',
-            //         fontWeight: 'bold'
-            //     }
-            // },
             tooltip: {
-                enabled: true,
-                custom: function({ series, seriesIndex, dataPointIndex, w }) {
-                    var data = w.config.series[seriesIndex].data[dataPointIndex];
-                    return `
-                        <div style="padding: 10px; background: rgba(255, 255, 255, 0.9); border: 1px solid #ccc; border-radius: 5px; display: flex; gap: 3px">
-                            <div style="font-size: 16px; font-weight: bold; color: #333;">Bubble Size:</div>
-                            <div style="font-size: 16px; color: #666;">${data.originalSize}</div>
-                        </div>
-                    `;
-                }
+                enabled: false,
+            },
+            theme: {
+                palette: ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
             },
         };
 
@@ -244,6 +250,7 @@ function updateChart(seriesData) {
     }
 }
 
+
 // Slider for adjusting bubble sizes
 var slider = document.getElementById("myRange");
 var output = document.getElementById("demo");
@@ -251,17 +258,22 @@ output.innerHTML = slider.value; // Display the default slider value
 
 // Function to update the chart with new bubble sizes
 function updateBubbleSizes(multiplier) {
-    var newSeriesData = originalData.map(item => {
-        var minSize = Math.min(...originalData.map(d => d.size));
-        return {
-            x: item.velocity,
-            y: item.probability,
-            z: (minSize + ((item.size - minSize) / downScallingFactor)) * multiplier, // Adjust size based on the slider's value
+
+    const newSeriesData = originalData.map(group => {
+        var minSize = Math.min(...group.data.map(d => d.z));
+        const adjustedData = group.data.map(item => ({
+            x: item.x,
+            y: item.y,
+            z: (minSize + ((item.z - minSize) / downScallingFactor)) * multiplier,
             name: item.name,
-            originalSize: item.size
+        }));
+        return {
+            name: group.name,
+            data: adjustedData
         };
     });
-    chart.updateSeries([{name: 'Size', data: newSeriesData}]);
+    
+    chart.updateSeries(newSeriesData);
 }
 
 // Event listener for slider input
