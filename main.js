@@ -24,6 +24,16 @@ let fontFamily = getComputedStyle(document.documentElement)
 .getPropertyValue('--font-family')
 .trim();
 
+// Define the color mapping
+const riskColors = {
+    "Accreditation": "#cc3300",
+    "AI, Content and Channel": "#009900",
+    "Capability": "#996633",
+    "Competitive Marketplace": "#0000ff",
+    "Customer Expectations": "#cc0099",
+    "Portfolio": "#999966",
+    "Reputation & Responsibility": "#009999"
+};
 
 // Function to handle file upload
 function handleFile(e) {
@@ -59,8 +69,8 @@ function resetChart() {
         chart = null;
     }
     originalData = [];
-    document.getElementById('myRange').value = 2.5;
-    document.getElementById('demo').innerHTML = 2.5;
+    document.getElementById('scaling-range').value = 2.5;
+    document.getElementById('scaling-text').innerHTML = 2.5;
 }
 
 function processChartData(jsonData) {
@@ -133,10 +143,18 @@ function splitNames(dataArray) {
 }
 
 function updateChart(seriesData) {
+
+    // Determine the colors for each series based on the risk
+    const seriesColors = seriesData.map(serie => riskColors[serie.name]);
+
     if (chart) {
         chart.updateSeries(seriesData);
+        chart.updateOptions({
+            colors: seriesColors
+        });
     } else {
         var options = {
+            colors: seriesColors,
             chart: {
                 type: 'bubble',
                 height: '90%',
@@ -252,8 +270,8 @@ function updateChart(seriesData) {
 
 
 // Slider for adjusting bubble sizes
-var slider = document.getElementById("myRange");
-var output = document.getElementById("demo");
+var slider = document.getElementById("scaling-range");
+var output = document.getElementById("scaling-text");
 output.innerHTML = slider.value; // Display the default slider value
 
 // Function to update the chart with new bubble sizes
