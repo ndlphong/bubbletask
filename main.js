@@ -16,7 +16,8 @@ document.getElementById('upload').addEventListener('change', handleFile, false);
 
 var chart, newChart;
 var originalData = [], newOriginalData = [];
-let downScallingFactor = 3; // Fine tuned to the point where it looks right
+let downScallingFactor = 1.3; // Fine tuned to the point where it looks right
+let newDownScallingFactor = 1.7; // Fine tuned to the point where it looks right
 
 let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
 let colorLabel = getComputedStyle(document.documentElement).getPropertyValue('--color-label').trim();
@@ -123,7 +124,7 @@ function processChartData(jsonData) {
         const processedData = dataArray.map(d => ({
             x: d.x,
             y: d.y,
-            z: minSize + ((d.z - minSize) / downScallingFactor),
+            z: minSize + ((d.z - minSize) / newDownScallingFactor),
             name: d.name,
         }));
 
@@ -142,18 +143,16 @@ function processChartData(jsonData) {
     updateBubbleSizes(parseFloat(slider.value));
 }
 
+// Function to process the new chart data
 function processNewChartData(jsonData) {
-    // New aggregation logic for the new chart
     const headers = jsonData[0];
     const data = jsonData.slice(1);
 
-    // Extract indices of required columns
     const sizeIndex = headers.indexOf('Size');
     const velocityIndex = headers.indexOf('Velocity');
     const probabilityIndex = headers.indexOf('Probability');
     const riskIndex = headers.indexOf('Risks');
 
-    // Group data by risks
     const groupedData = {};
     data.forEach(row => {
         const risk = row[riskIndex];
@@ -171,7 +170,10 @@ function processNewChartData(jsonData) {
         groupedData[risk].sizes.push(parseFloat(row[sizeIndex]));
     });
 
-    // Aggregate data by risks
+    // Calculate the minimum size across all data
+    const allSizes = data.map(row => parseFloat(row[sizeIndex]));
+    const minSize = Math.min(...allSizes);
+
     const aggregatedData = Object.keys(groupedData).map(risk => {
         const dataArray = groupedData[risk];
         const highestVelocity = Math.max(...dataArray.velocities);
@@ -183,18 +185,14 @@ function processNewChartData(jsonData) {
             data: [{
                 x: highestVelocity,
                 y: averageProbability,
-                z: totalSize,
+                z: minSize + ((totalSize - minSize) / downScallingFactor), // Apply downscaling factor here
                 name: risk.split(' ') // Split risk name for better display
             }]
         };
     });
 
-    // Save original data for later use in updateNewBubbleSizes
     newOriginalData = aggregatedData;
-    // Update the chart with the new series data
     updateNewChart(aggregatedData);
-
-    // Call updateNewBubbleSizes on page load to set the correct initial size
     updateNewBubbleSizes(parseFloat(newSlider.value));
 }
 
@@ -481,7 +479,7 @@ function updateNewBubbleSizes(multiplier) {
         const adjustedData = group.data.map(item => ({
             x: item.x,
             y: item.y,
-            z: (minSize + ((item.z - minSize) / downScallingFactor)) * multiplier,
+            z: (minSize + ((item.z - minSize) / newDownScallingFactor)) * multiplier,
             name: item.name,
         }));
         return {
