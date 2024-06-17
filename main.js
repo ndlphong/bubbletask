@@ -210,7 +210,7 @@ function updateChart(seriesData) {
             colors: seriesColors,
             chart: {
                 type: 'bubble',
-                height: '90%',
+                height: '1080',
                 width: '100%',
                 id: 'myChart',
                 animations: {
@@ -314,6 +314,16 @@ function updateChart(seriesData) {
             tooltip: {
                 enabled: false,
             },
+            legend: {
+                fontSize: '15px',
+                markers: {
+                    width: 15,
+                    height: 15,
+                },
+                itemMargin: {
+                    horizontal: 8,
+                }
+            }
         };
 
         chart = new ApexCharts(document.querySelector("#chart"), options);
@@ -335,7 +345,7 @@ function updateNewChart(seriesData) {
             colors: seriesColors,
             chart: {
                 type: 'bubble',
-                height: '90%',
+                height: '900',
                 width: '100%',
                 id: 'myNewChart',
                 animations: {
@@ -437,8 +447,17 @@ function updateNewChart(seriesData) {
             tooltip: {
                 enabled: false,
             },
+            legend: {
+                fontSize: '15px',
+                markers: {
+                    width: 15,
+                    height: 15,
+                },
+                itemMargin: {
+                    horizontal: 8,
+                }
+            }
         };
-
         newChart = new ApexCharts(document.querySelector("#new-chart"), options);
         newChart.render();
     }
