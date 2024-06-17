@@ -16,7 +16,7 @@ body {
     height: 100vh;
     margin: 0;
     font-family: var(--font-family);
-    background-color: var(--color-pearson); 
+    background-color: #ffffff; /* Ensure the background is white */
     color: var(--color-text); 
     padding-top: 20px;
 }
@@ -30,19 +30,20 @@ body {
     justify-content: flex-start; /* Changed to flex-start for top alignment */
     align-items: center;
     margin-bottom: 50px;
-    background: #ffffff; /* Light container background */
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: #ffffff; /* Ensure container background is white */
+    border: none; /* Remove border */
+    box-shadow: none; /* Remove shadow */
     padding: 20px 20px 100px 20px; 
 }
 
 /* Chart Styling */
-#chart {
+#chart, #new-chart {
     width: 100%;
-    background: #ffffff; /* Lighter chart background */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
+    box-shadow: none; /* Remove shadow */
+    border: none; /* Remove border */
+    border-radius: 0; /* Remove border radius */
     padding: 7px;
+    background: #ffffff; /* Ensure chart background is white */
 }
 
 /* Slider Container Styling */
@@ -84,6 +85,7 @@ body {
     border-radius: 50%;
     background: #007FA3;
     cursor: pointer;
+    border: none; /* Remove border */
 }
 
 .slider::-moz-range-thumb {
@@ -92,6 +94,7 @@ body {
     border-radius: 50%;
     background: #007FA3;
     cursor: pointer;
+    border: none; /* Remove border */
 }
 
 /* File Upload Button Styling */
@@ -105,7 +108,7 @@ input[type="file"] {
     cursor: pointer;
     background-color: #007FA3;
     color: #ffffff;
-    border: none;
+    border: none; /* Remove border */
     border-radius: 4px;
     font-size: 16px;
     font-weight: bold;
@@ -120,7 +123,7 @@ input[type="file"] {
 
 /* Change the bubble color */
 circle {
-    opacity: 0.9;
+    opacity: 0.75;
 }
 
 /* Download Button Styling */
@@ -130,7 +133,7 @@ circle {
     cursor: pointer;
     background-color: #007FA3;
     color: #ffffff;
-    border: none;
+    border: none; /* Remove border */
     border-radius: 4px;
     font-size: 16px;
     font-weight: bold;
@@ -141,4 +144,11 @@ circle {
 
 .download-btn:hover {
     background-color: #0056b3;
+}
+
+/* New Slider Container Styling */
+#new-slider-container {
+    width: 80%;
+    margin: 20px auto;
+    text-align: center;
 }

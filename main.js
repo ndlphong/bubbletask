@@ -1,28 +1,28 @@
+// Some notes:
+// - The code is written in vanilla JavaScript
+// - The code uses the ApexCharts library for creating the bubble charts
+// - The code uses the XLSX library for reading Excel files
+// - The code uses the html2canvas library for downloading the charts as images
+// - The code uses the CSS custom properties to get the colors and fonts from the CSS
+// - The code uses the riskColors object to map the risks to colors
+// - The downScallingFactor is fine tuned to the point where it looks right
+// - The code uses the processChartData function to process the original data
+
+// Changes upcoming:
+// - Make texts align to the center of the bubbles
+// - Edit the overlapping bubbles in the chart so the biggest bubble is always on the bottom
+
 document.getElementById('upload').addEventListener('change', handleFile, false);
 
-var chart;
-var originalData = [];
+var chart, newChart;
+var originalData = [], newOriginalData = [];
 let downScallingFactor = 3; // Fine tuned to the point where it looks right
 
-let primaryColor = getComputedStyle(document.documentElement)
-.getPropertyValue('--color-primary')
-.trim();
-
-let colorLabel = getComputedStyle(document.documentElement)
-.getPropertyValue('--color-label')
-.trim();
-
-let colorText = getComputedStyle(document.documentElement)
-.getPropertyValue('--color-text')
-.trim();
-
-let labelColor = getComputedStyle(document.documentElement)
-.getPropertyValue('--color-label')
-.trim();
-
-let fontFamily = getComputedStyle(document.documentElement)
-.getPropertyValue('--font-family')
-.trim();
+let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+let colorLabel = getComputedStyle(document.documentElement).getPropertyValue('--color-label').trim();
+let colorText = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim();
+let labelColor = getComputedStyle(document.documentElement).getPropertyValue('--color-label').trim();
+let fontFamily = getComputedStyle(document.documentElement).getPropertyValue('--font-family').trim();
 
 // Define the color mapping
 const riskColors = {
@@ -51,30 +51,39 @@ function handleFile(e) {
         // Convert the worksheet to JSON data
         const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
         
-        // Show the slider container
+        // Show the slider containers
         document.getElementById('slider-container').style.display = 'block';
+        document.getElementById('new-slider-container').style.display = 'block';
         
-        // Reset chart and related data
-        resetChart();
+        // Reset charts and related data
+        resetCharts();
         
         // Process the jsonData to fit the chart data structure
         processChartData(jsonData);
+        processNewChartData(jsonData); // For the new chart
     };
     reader.readAsArrayBuffer(file);
 }
 
-function resetChart() {
+function resetCharts() {
     if (chart) {
         chart.destroy();
         chart = null;
     }
+    if (newChart) {
+        newChart.destroy();
+        newChart = null;
+    }
     originalData = [];
-    document.getElementById('scaling-range').value = 2.5;
-    document.getElementById('scaling-text').innerHTML = 2.5;
+    newOriginalData = [];
+    document.getElementById('myRange').value = 2.5;
+    document.getElementById('demo').innerHTML = 2.5;
+    document.getElementById('newRange').value = 2.5;
+    document.getElementById('newDemo').innerHTML = 2.5;
 }
 
 function processChartData(jsonData) {
-    // Assume the first row is the header
+    // Original processChartData logic
     const headers = jsonData[0];
     const data = jsonData.slice(1);
 
@@ -133,18 +142,64 @@ function processChartData(jsonData) {
     updateBubbleSizes(parseFloat(slider.value));
 }
 
+function processNewChartData(jsonData) {
+    // New aggregation logic for the new chart
+    const headers = jsonData[0];
+    const data = jsonData.slice(1);
 
-// Split the name into an array of words
-function splitNames(dataArray) {
-    dataArray.forEach(item => {
-        item.name = item.name.split(' '); 
+    // Extract indices of required columns
+    const sizeIndex = headers.indexOf('Size');
+    const velocityIndex = headers.indexOf('Velocity');
+    const probabilityIndex = headers.indexOf('Probability');
+    const riskIndex = headers.indexOf('Risks');
+
+    // Group data by risks
+    const groupedData = {};
+    data.forEach(row => {
+        const risk = row[riskIndex];
+        if (!groupedData[risk]) {
+            groupedData[risk] = {
+                names: [],
+                velocities: [],
+                probabilities: [],
+                sizes: []
+            };
+        }
+        groupedData[risk].names.push(row[headers.indexOf('Name')]);
+        groupedData[risk].velocities.push(parseFloat(row[velocityIndex]));
+        groupedData[risk].probabilities.push(parseFloat(row[probabilityIndex]));
+        groupedData[risk].sizes.push(parseFloat(row[sizeIndex]));
     });
-    return dataArray;
+
+    // Aggregate data by risks
+    const aggregatedData = Object.keys(groupedData).map(risk => {
+        const dataArray = groupedData[risk];
+        const highestVelocity = Math.max(...dataArray.velocities);
+        const totalSize = dataArray.sizes.reduce((a, b) => a + b, 0);
+        const averageProbability = dataArray.probabilities.reduce((a, b) => a + b, 0) / dataArray.probabilities.length;
+
+        return {
+            name: risk,
+            data: [{
+                x: highestVelocity,
+                y: averageProbability,
+                z: totalSize,
+                name: risk.split(' ') // Split risk name for better display
+            }]
+        };
+    });
+
+    // Save original data for later use in updateNewBubbleSizes
+    newOriginalData = aggregatedData;
+    // Update the chart with the new series data
+    updateNewChart(aggregatedData);
+
+    // Call updateNewBubbleSizes on page load to set the correct initial size
+    updateNewBubbleSizes(parseFloat(newSlider.value));
 }
 
 function updateChart(seriesData) {
-
-    // Determine the colors for each series based on the risk
+    // Original updateChart logic
     const seriesColors = seriesData.map(serie => riskColors[serie.name]);
 
     if (chart) {
@@ -182,6 +237,9 @@ function updateChart(seriesData) {
             },
             dataLabels: {
                 enabled: true,
+                position: 'top',
+                textAnchor: 'middle',
+                offsetY: -15,
                 style: {
                     colors: ['white'],
                     fontSize: '15px',
@@ -258,9 +316,6 @@ function updateChart(seriesData) {
             tooltip: {
                 enabled: false,
             },
-            theme: {
-                palette: ["#FFFFFF", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
-            },
         };
 
         chart = new ApexCharts(document.querySelector("#chart"), options);
@@ -268,15 +323,140 @@ function updateChart(seriesData) {
     }
 }
 
+function updateNewChart(seriesData) {
+    // New chart logic similar to updateChart
+    const seriesColors = seriesData.map(serie => riskColors[serie.name]);
+
+    if (newChart) {
+        newChart.updateSeries(seriesData);
+        newChart.updateOptions({
+            colors: seriesColors
+        });
+    } else {
+        var options = {
+            colors: seriesColors,
+            chart: {
+                type: 'bubble',
+                height: '90%',
+                width: '100%',
+                id: 'myNewChart',
+                animations: {
+                    enabled: false,
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            grid: {
+                show: true,
+                xaxis: {
+                    lines: {
+                        show: true
+                    }
+                },   
+                yaxis: {
+                    lines: {
+                        show: true
+                    }
+                }, 
+            },
+            dataLabels: {
+                enabled: true,
+                offsetY: -10,
+                style: {
+                    colors: ['white'],
+                    fontSize: '15px',
+                    fontWeight: '400',
+                },
+                formatter: function(val, opts) {
+                    const dataPoint = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex];
+                    return dataPoint && dataPoint.name ? dataPoint.name : '';
+                }
+            },
+            series: seriesData,
+            xaxis: {
+                min: 0.5,
+                max: 3.5,
+                tickAmount: 6,
+                labels: {
+                    formatter: function(val) {
+                        if (val === 1) return 'More than 2 years';
+                        if (val === 2) return '1-2 years';
+                        if (val === 3) return 'Less than 1 year';
+                        return '';
+                    },
+                    style: {
+                        colors: colorText,
+                        fontSize: '15px',
+                    }
+                },
+                title: {
+                    text: 'Velocity',
+                    style: {
+                        color: colorText,
+                        fontSize: '20px',
+                        fontWeight: '400',
+                    }
+                },
+                axisTicks: {
+                    show: true,
+                    color: colorText
+                },
+                crosshairs: {
+                    show: false
+                },
+            },
+            yaxis: {
+                max: 50,
+                title: {
+                    text: 'Probability',
+                    style: {
+                        color: colorText,
+                        fontSize: '20px',
+                        fontWeight: '400',
+                    }
+                },
+                tickAmount: 5,
+                labels: {
+                    formatter: function(val) {
+                        return val + '%';
+                    },
+                    style: {
+                        colors: colorText,
+                        fontSize: '15px',
+                    }
+                },
+                axisTicks: {
+                    show: true,
+                    color: colorText
+                },
+            },
+            plotOptions: {
+                bubble: {
+                    zScaling: false,
+                }
+            },
+            tooltip: {
+                enabled: false,
+            },
+        };
+
+        newChart = new ApexCharts(document.querySelector("#new-chart"), options);
+        newChart.render();
+    }
+}
 
 // Slider for adjusting bubble sizes
-var slider = document.getElementById("scaling-range");
-var output = document.getElementById("scaling-text");
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
 output.innerHTML = slider.value; // Display the default slider value
+
+var newSlider = document.getElementById("newRange");
+var newOutput = document.getElementById("newDemo");
+newOutput.innerHTML = newSlider.value; // Display the default slider value
 
 // Function to update the chart with new bubble sizes
 function updateBubbleSizes(multiplier) {
-
     const newSeriesData = originalData.map(group => {
         var minSize = Math.min(...group.data.map(d => d.z));
         const adjustedData = group.data.map(item => ({
@@ -294,10 +474,34 @@ function updateBubbleSizes(multiplier) {
     chart.updateSeries(newSeriesData);
 }
 
+// Function to update the new chart with new bubble sizes
+function updateNewBubbleSizes(multiplier) {
+    const newSeriesData = newOriginalData.map(group => {
+        var minSize = Math.min(...group.data.map(d => d.z));
+        const adjustedData = group.data.map(item => ({
+            x: item.x,
+            y: item.y,
+            z: (minSize + ((item.z - minSize) / downScallingFactor)) * multiplier,
+            name: item.name,
+        }));
+        return {
+            name: group.name,
+            data: adjustedData
+        };
+    });
+    
+    newChart.updateSeries(newSeriesData);
+}
+
 // Event listener for slider input
 slider.oninput = function() {
     output.innerHTML = this.value;
     updateBubbleSizes(parseFloat(this.value)); // Convert slider value to float and update chart
+};
+
+newSlider.oninput = function() {
+    newOutput.innerHTML = this.value;
+    updateNewBubbleSizes(parseFloat(this.value)); // Convert slider value to float and update chart
 };
 
 document.getElementById('download-chart').addEventListener('click', function () {
@@ -306,6 +510,19 @@ document.getElementById('download-chart').addEventListener('click', function () 
         const a = document.createElement('a');
         a.href = imgURI;
         a.download = 'chart.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+});
+
+// Event listener for the new chart download
+document.getElementById('download-new-chart').addEventListener('click', function () {
+    html2canvas(document.querySelector("#new-chart"), {backgroundColor: null}).then(canvas => {
+        const imgURI = canvas.toDataURL("image/png");
+        const a = document.createElement('a');
+        a.href = imgURI;
+        a.download = 'new-chart.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

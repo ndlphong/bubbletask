@@ -18,11 +18,21 @@
             <button id="download-chart" class="download-btn">Download Chart</button>
         </div>
 
-        <!-- Chart and Slider Container -->
+        <!-- Original Chart and Slider Container -->
         <div id="chart" data-chart-id="myChart"></div>
         <div class="slidecontainer" id="slider-container" style="display: none;">
-            <input type="range" min="1" max="5" value="2.5" step="0.1" class="slider" id="scaling-range">
-            <p class="slider-text"><strong>Bubble size scaling value: </strong><span id="scaling-text"></span></p>
+            <input type="range" min="1" max="5" value="2.5" step="0.1" class="slider" id="myRange">
+            <p class="slider-text"><strong>Bubble size scaling value: </strong><span id="demo"></span></p>
+        </div>
+
+        <!-- New Download Button -->
+        <button id="download-new-chart" class="download-btn">Download New Chart</button>
+        
+        <!-- New Chart and Slider Container -->
+        <div id="new-chart" data-chart-id="myNewChart"></div>
+        <div class="slidecontainer" id="new-slider-container" style="display: none;">
+            <input type="range" min="1" max="5" value="2.5" step="0.1" class="slider" id="newRange">
+            <p class="slider-text"><strong>Bubble size scaling value: </strong><span id="newDemo"></span></p>
         </div>
     </div>
     <script src="main.js"></script>
