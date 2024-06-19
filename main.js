@@ -16,6 +16,7 @@ document.getElementById('upload').addEventListener('change', handleFile, false);
 
 var chart, newChart;
 var originalData = [], newOriginalData = [];
+var sizeData = [], newSizeData = [];
 let downScallingFactor = 1.3; // Fine tuned to the point where it looks right
 let newDownScallingFactor = 1.7; // Fine tuned to the point where it looks right
 
@@ -91,7 +92,7 @@ function processChartData(jsonData) {
     // Find the smallest size in the dataset directly from the data array
     const sizeIndex = headers.indexOf('Size');
     const minSize = Math.min(...data.map(row => parseFloat(row[sizeIndex])));
-    console.log('Minimum size:', minSize);
+    sizeData = data.map(row => parseFloat(row[sizeIndex]));
 
     // Extract index of the Risk column
     const riskIndex = headers.indexOf('Risks');
@@ -136,8 +137,11 @@ function processChartData(jsonData) {
 
     // Save original data for later use in updateBubbleSizes
     originalData = seriesData;
+
     // Update the chart with the new series data
-    updateChart(seriesData);
+    updateChart(originalData);
+    
+    adjustSliderMaxValue("#chart", sizeData);
 
     // Call updateBubbleSizes on page load to set the correct initial size
     updateBubbleSizes(parseFloat(slider.value));
@@ -171,14 +175,17 @@ function processNewChartData(jsonData) {
     });
 
     // Calculate the minimum size across all data
-    const allSizes = data.map(row => parseFloat(row[sizeIndex]));
-    const minSize = Math.min(...allSizes);
+    const size = data.map(row => parseFloat(row[sizeIndex]));
+    const minSize = Math.min(...size);
+    let sizeArr = [];
 
     const aggregatedData = Object.keys(groupedData).map(risk => {
         const dataArray = groupedData[risk];
         const highestVelocity = Math.max(...dataArray.velocities);
         const totalSize = dataArray.sizes.reduce((a, b) => a + b, 0);
         const averageProbability = dataArray.probabilities.reduce((a, b) => a + b, 0) / dataArray.probabilities.length;
+
+        sizeArr.push(totalSize); // for restriction on the scalar line
 
         return {
             name: risk,
@@ -191,8 +198,10 @@ function processNewChartData(jsonData) {
         };
     });
 
+    newSizeData = sizeArr;
     newOriginalData = aggregatedData;
     updateNewChart(aggregatedData);
+    adjustSliderMaxValue("#new-chart", newSizeData);
     updateNewBubbleSizes(parseFloat(newSlider.value));
 }
 
@@ -208,6 +217,7 @@ function updateChart(seriesData) {
     } else {
         var options = {
             colors: seriesColors,
+
             chart: {
                 type: 'bubble',
                 height: '1080',
@@ -218,6 +228,11 @@ function updateChart(seriesData) {
                 },
                 toolbar: {
                     show: false
+                },
+                events: {
+                    legendClick: function(chartContext, seriesIndex, config) {
+                        setTimeout(() => centerTextLabels("#chart"), 0);
+                    },
                 }
             },
             grid: {
@@ -233,11 +248,11 @@ function updateChart(seriesData) {
                     }
                 }, 
             },
+
             dataLabels: {
                 enabled: true,
-                position: 'top',
                 textAnchor: 'middle',
-                offsetY: -15,
+                // offsetY: -15,
                 style: {
                     colors: ['white'],
                     fontSize: '15px',
@@ -353,6 +368,11 @@ function updateNewChart(seriesData) {
                 },
                 toolbar: {
                     show: false
+                },
+                events: {
+                    legendClick: function(chartContext, seriesIndex, config) {
+                        setTimeout(() => centerTextLabels("#new-chart"), 0);
+                    },
                 }
             },
             grid: {
@@ -370,7 +390,7 @@ function updateNewChart(seriesData) {
             },
             dataLabels: {
                 enabled: true,
-                offsetY: -10,
+                // offsetY: -10,
                 style: {
                     colors: ['white'],
                     fontSize: '15px',
@@ -460,6 +480,8 @@ function updateNewChart(seriesData) {
         };
         newChart = new ApexCharts(document.querySelector("#new-chart"), options);
         newChart.render();
+
+        
     }
 }
 
@@ -489,6 +511,7 @@ function updateBubbleSizes(multiplier) {
     });
     
     chart.updateSeries(newSeriesData);
+    centerTextLabels("#chart");
 }
 
 // Function to update the new chart with new bubble sizes
@@ -508,6 +531,7 @@ function updateNewBubbleSizes(multiplier) {
     });
     
     newChart.updateSeries(newSeriesData);
+    centerTextLabels("#new-chart");
 }
 
 // Event listener for slider input
@@ -545,3 +569,81 @@ document.getElementById('download-new-chart').addEventListener('click', function
         document.body.removeChild(a);
     });
 });
+
+
+function centerTextLabels(chartTag){
+    const chart = document.querySelector(chartTag);
+	chart.querySelectorAll('.apexcharts-datalabels text').forEach(node => {
+		const y0 = parseFloat(node.getAttribute("y"));
+		let totalDy = 0;
+		node.childNodes.forEach(
+			childNode => {
+				totalDy += parseFloat(childNode.getAttribute?.("dy") ?? "0");
+			}
+		);
+		if(totalDy !== 0){
+			node.setAttribute("y", (y0 - totalDy/2).toFixed(2));
+		}
+	});
+    console.log(`Updated ${chartTag}`)
+}
+
+// Random function that finds the smallest text size in the chart
+function getMinimumTextBoundingBoxSize(chartTag) {
+    const chart = document.querySelector(chartTag);
+    let minWidth = 0;
+    let minHeight = 0;
+    chart.querySelectorAll('.apexcharts-datalabels text').forEach(node => {
+        const bbox = node.getBBox();
+        if (bbox.width > minWidth) {
+            minWidth = bbox.width;
+        }
+        if (bbox.height > minHeight) {
+            minHeight = bbox.height;
+        }
+    });
+
+    // Return the larger dimension to ensure both width and height fit
+    console.log(`Width: ${minWidth}, Height: ${minHeight}, MIN: ${Math.max(minWidth, minHeight)}`);
+    return Math.max(minWidth, minHeight);
+}
+
+let resizeTimeout;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        centerTextLabels("#chart");
+        centerTextLabels("#new-chart");
+    }, 200); // Adjust the delay as needed
+});
+
+
+function determineMaxScalingFactor(chartTag, sizeData) {
+    const minTextSize = getMinimumTextBoundingBoxSize(chartTag);
+
+    console.log(sizeData);
+    // Find the smallest bubble size from the original data
+    minBubbleSize = Math.min(...sizeData) * 2;
+
+    console.log(`${minTextSize}, ${minBubbleSize}`)
+
+    // Calculate the maximum scaling factor that keeps the minimum bubble size >= minTextSize
+    return minTextSize * Math.sqrt(2) / (minBubbleSize);
+}
+
+function adjustSliderMaxValue(chartTag, sizeData) {
+    const minScalingFactor = determineMaxScalingFactor(chartTag, sizeData);
+    const maxScalingFactor = minScalingFactor + 3;
+    const defaultScalingFactor = minScalingFactor + 0.2;
+
+    const slider = document.querySelector(`${chartTag} ~ .slidecontainer .slider`);
+    const output = document.querySelector(`${chartTag} ~ .slidecontainer .slider-text span`);
+
+    slider.min = minScalingFactor.toFixed(1);
+    slider.max = maxScalingFactor.toFixed(1);
+    slider.value = defaultScalingFactor.toFixed(1);
+    output.innerHTML = defaultScalingFactor.toFixed(1);
+
+    console.log(`Slider adjusted: min=${slider.min}, max=${slider.max}, value=${slider.value}`);
+}
+
