@@ -233,6 +233,9 @@ function updateChart(seriesData) {
                     legendClick: function(chartContext, seriesIndex, config) {
                         setTimeout(() => centerTextLabels("#chart"), 0);
                     },
+                },
+                zoom: {
+                    enabled: false,
                 }
             },
             grid: {
@@ -373,6 +376,9 @@ function updateNewChart(seriesData) {
                     legendClick: function(chartContext, seriesIndex, config) {
                         setTimeout(() => centerTextLabels("#new-chart"), 0);
                     },
+                },
+                zoom: {
+                    enabled: false,
                 }
             },
             grid: {
@@ -614,7 +620,7 @@ window.addEventListener('resize', function() {
     resizeTimeout = setTimeout(() => {
         centerTextLabels("#chart");
         centerTextLabels("#new-chart");
-    }, 200); // Adjust the delay as needed
+    }, 200);
 });
 
 
